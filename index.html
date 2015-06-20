@@ -77,7 +77,7 @@
 
             var sphereShape, sphereBody, world, physicsMaterial, walls=[], balls=[], ballMeshes=[], boxes=[], boxMeshes=[];
 
-            var camera, scene, renderer;
+            var camera, scene, renderer, floor;
             var geometry, material, mesh;
             var controls,time = Date.now();
             var levels = new Map();
@@ -245,19 +245,19 @@
 
                 controls = new PointerLockControls( camera , sphereBody );
                 scene.add( controls.getObject() );
-
-                // floor
-                // geometry = new THREE.PlaneGeometry( 300, 300, 50, 50 );
-                // geometry.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-
-                // material = new THREE.MeshLambertMaterial();
                 
+                //Geometria
+  
+                floor = new THREE.Mesh(
+                             new THREE.PlaneGeometry( 500, 500, 1, 1 ),
+                             new THREE.MeshPhongMaterial( {color: 0x999999, side: THREE.DoubleSide} )
+                             );
 
-                // mesh = new THREE.Mesh( geometry, material );
-                // mesh.castShadow = true;
-                // mesh.receiveShadow = true;
-                // scene.add( mesh );
-
+                floor.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
+                floor.position.y = -10;
+                scene.add( floor );
+                //Koniec geometrii
+                
                 material_for_boxes = new THREE.MeshLambertMaterial();
                 material_for_boxes.map = THREE.ImageUtils.loadTexture("textures/metal-floor.jpg");
 
@@ -333,7 +333,7 @@
                     world.step(dt);
 
                 }
-
+                floor.position.y += 0.02;
                 controls.update( Date.now() - time );
                 renderer.render( scene, camera );
                 time = Date.now();
