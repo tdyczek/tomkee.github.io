@@ -62,6 +62,7 @@
         <script src="js/Three.js"></script>
         <script src="js/cannon.js"></script>
         <script src="js/PointerLockControls.js"></script>
+         <script src="js/water-material.js"></script>
 
         <div id="blocker">
 
@@ -77,7 +78,7 @@
 
             var sphereShape, sphereBody, world, physicsMaterial, walls=[], balls=[], ballMeshes=[], boxes=[], boxMeshes=[];
 
-            var camera, scene, renderer, floor;
+            var camera, scene, renderer, aMeshMirror;
             var geometry, material, mesh;
             var controls,time = Date.now();
             var levels = new Map();
@@ -246,18 +247,9 @@
                 controls = new PointerLockControls( camera , sphereBody );
                 scene.add( controls.getObject() );
                 
-                //Geometria
-  
-                floor = new THREE.Mesh(
-                             new THREE.PlaneGeometry( 500, 500, 1, 1 ),
-                             new THREE.MeshPhongMaterial( {color: 0x999999, side: THREE.DoubleSide} )
-                             );
+         
 
-                floor.applyMatrix( new THREE.Matrix4().makeRotationX( - Math.PI / 2 ) );
-                floor.position.y = -10;
-                scene.add( floor );
-                //Koniec geometrii
-                
+    
                 material_for_boxes = new THREE.MeshLambertMaterial();
                 material_for_boxes.map = THREE.ImageUtils.loadTexture("textures/metal-floor.jpg");
 
@@ -272,6 +264,38 @@
                 window.addEventListener( 'resize', onWindowResize, false );
                 // Add boxes
                
+//
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(-120, 200, 120);
+        scene.add(directionalLight);
+                        var waterNormals = new THREE.ImageUtils.loadTexture('textures/waternormals.jpg');
+        waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
+        
+        // Create the water effect
+        this.ms_Water = new THREE.Water(renderer, camera, scene, {
+            textureWidth: 10,
+            textureHeight: 10,
+            waterNormals: waterNormals,
+            alpha:  1.0,
+            sunDirection: directionalLight.position.normalize(),
+            sunColor: 0xffffff,
+            waterColor: 0x001e0f,
+            betaVersion: 0,
+            side: THREE.DoubleSide
+        });
+        aMeshMirror = new THREE.Mesh(
+            new THREE.PlaneGeometry(100, 100), 
+            this.ms_Water.material
+        );
+        aMeshMirror.add(this.ms_Water);
+        aMeshMirror.rotation.x = - Math.PI * 0.5;
+        aMeshMirror.position.y = -10;
+        
+        scene.add(aMeshMirror);
+        this.ms_Water.render();
+
+//
+
 
                 for(var i=0; i<50; i++){
                     var x = Math.floor( Math.random() * 20 - 10 );
@@ -328,12 +352,13 @@
 
             var dt = 1/60;
             function animate() {
+                this.ms_Water.material.uniforms.time.value += 1.0 / 60.0;
                 requestAnimationFrame( animate );
                 if(controls.enabled){
                     world.step(dt);
 
                 }
-                floor.position.y += 0.02;
+                aMeshMirror.position.y += 0.02;
                 controls.update( Date.now() - time );
                 renderer.render( scene, camera );
                 time = Date.now();
