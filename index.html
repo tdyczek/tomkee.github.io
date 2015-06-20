@@ -82,7 +82,8 @@
             var geometry, material, mesh;
             var controls,time = Date.now();
             var levels = new Map();
-
+            var light;
+            var id;
 
 
             var halfExtents = new CANNON.Vec3(1,1,1);
@@ -213,7 +214,7 @@
                 sphereShape = new CANNON.Box(halfExtents1);
                 sphereBody = new CANNON.Body({ mass: mass });
                 sphereBody.addShape(sphereShape);
-                sphereBody.position.set(0,5,0);
+                sphereBody.position.set(-6,0,0);
                 sphereBody.linearDamping = 0.9;
                 sphereBody.material = physicsMaterial;
                 world.addBody(sphereBody);
@@ -234,13 +235,8 @@
                 scene = new THREE.Scene();
                 scene.fog = new THREE.Fog( 0x000000, 0, 500 );
 
-              
-                var light = new THREE.DirectionalLight( 0xffffff, 1.5 );
-                light.position.set( 1, 1, 1 );
-                scene.add( light );
-
-                var light = new THREE.DirectionalLight( 0xffffff, 0.75 );
-                light.position.set( -1, - 0.5, -1 );
+ 
+                light = new THREE.AmbientLight( 0xffffff ); // soft white light
                 scene.add( light );
 
 
@@ -266,7 +262,7 @@
                
 //
     var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(-120, 200, 120);
+        directionalLight.position.set(20, 10, 20);
         scene.add(directionalLight);
                         var waterNormals = new THREE.ImageUtils.loadTexture('textures/waternormals.jpg');
         waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
@@ -294,7 +290,15 @@
         scene.add(aMeshMirror);
         this.ms_Water.render();
 
-//
+    var floorTexture = new THREE.ImageUtils.loadTexture( 'textures/stone.jpg' );
+    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
+    floorTexture.repeat.set( 10, 10 );
+    var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side:THREE.BackSide } );
+    var floorGeometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
+    var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.position.y = -0.5;
+    floor.rotation.x = Math.PI / 2;
+    scene.add(floor);
 
 
                 for(var i=0; i<50; i++){
@@ -353,7 +357,7 @@
             var dt = 1/60;
             function animate() {
                 this.ms_Water.material.uniforms.time.value += 1.0 / 60.0;
-                requestAnimationFrame( animate );
+                id = requestAnimationFrame( animate );
                 if(controls.enabled){
                     world.step(dt);
 
@@ -363,6 +367,19 @@
                 renderer.render( scene, camera );
                 time = Date.now();
                 
+                if(aMeshMirror.position.y > sphereBody.position.y){
+                    controls.enabled = false;
+                    var text2 = document.createElement('div');
+                    text2.style.position = 'absolute';
+                    text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+                    text2.style.width = 120;
+                    text2.style.height = 120;
+                    text2.innerHTML = "<img src=\"textures/end.png\">";
+                    text2.style.top = 200 + 'px';
+                    text2.style.left = 350 + 'px';
+                    document.body.appendChild(text2);
+                }
+
                 if(!levels.has(Math.floor(sphereBody.position.y/20))){
                                     for(var i=0; i<40; i++){
                     var x = Math.floor( Math.random() * 20 - 10 );
