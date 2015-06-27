@@ -62,8 +62,9 @@
         <script src="js/Three.js"></script>
         <script src="js/cannon.js"></script>
         <script src="js/PointerLockControls.js"></script>
-         <script src="js/water-material.js"></script>
-
+        <script src="js/water-material.js"></script>
+        <script src="js/game.models.js"></script>
+            <script type="text/javascript" src="ColladaLoader.js"></script>
         <div id="blocker">
 
             <div id="instructions">
@@ -88,9 +89,26 @@
 
             var halfExtents = new CANNON.Vec3(1,1,1);
             var boxShape = new CANNON.Box(halfExtents);
-            var boxGeometry = new THREE.BoxGeometry(halfExtents.x*2,halfExtents.y*2,halfExtents.z*2);            
+            var boxGeometry = new THREE.CubeGeometry(halfExtents.x*2,halfExtents.y*2,halfExtents.z*2);  
+            var material_for_boxes = new THREE.MeshLambertMaterial();
+                material_for_boxes.map = THREE.ImageUtils.loadTexture("textures/metal-floor.jpg");
+                   var loader = new THREE.ColladaLoader();
+
+        var shameMesh;
+        loader.load("Truck_dae.dae", function (result) {
+            shameMesh = result.scene.children[0].children[0].clone();
+            shameMesh.scale.set(0.1, 0.1, 0.1);
+            scene.add(shameMesh);
+        });
+            // loader = new THREE.JSONLoader();
+            // jsonModel = loader.parse(window.game.models.player);          
+            // var shameGeometry = new THREE.SphereGeometry(halfExtents.x, halfExtents.y,halfExtents.z);  
+            // var material_for_shame = new THREE.MeshLambertMaterial();
+            //     material_for_shame.map = THREE.ImageUtils.loadTexture("textures/metal-floor.jpg");
+            // var shameMesh = new THREE.Mesh( shameGeometry, material_for_shame );
+            // var shameMesh = new THREE.Mesh(jsonModel.geometry, meshMaterial);
+
             var blocker = document.getElementById( 'blocker' );
-            
             var instructions = document.getElementById( 'instructions' );
 
             var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
@@ -211,7 +229,7 @@
                 // Create a sphere
                 var mass = 5, radius = 1;
                 var halfExtents1 = new CANNON.Vec3(1,1,1);
-                sphereShape = new CANNON.Box(halfExtents1);
+                sphereShape = new CANNON.Sphere(radius);
                 sphereBody = new CANNON.Body({ mass: mass });
                 sphereBody.addShape(sphereShape);
                 sphereBody.position.set(-6,0,0);
@@ -246,8 +264,6 @@
          
 
     
-                material_for_boxes = new THREE.MeshLambertMaterial();
-                material_for_boxes.map = THREE.ImageUtils.loadTexture("textures/metal-floor.jpg");
 
                 renderer = new THREE.WebGLRenderer();
                 renderer.shadowMapEnabled = true;
@@ -264,31 +280,31 @@
     var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(20, 10, 20);
         scene.add(directionalLight);
-                        var waterNormals = new THREE.ImageUtils.loadTexture('textures/waternormals.jpg');
-        waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
+        //                 var waterNormals = new THREE.ImageUtils.loadTexture('textures/waternormals.jpg');
+        // waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping; 
         
-        // Create the water effect
-        this.ms_Water = new THREE.Water(renderer, camera, scene, {
-            textureWidth: 10,
-            textureHeight: 10,
-            waterNormals: waterNormals,
-            alpha:  1.0,
-            sunDirection: directionalLight.position.normalize(),
-            sunColor: 0xffffff,
-            waterColor: 0x001e0f,
-            betaVersion: 0,
-            side: THREE.DoubleSide
-        });
-        aMeshMirror = new THREE.Mesh(
-            new THREE.PlaneGeometry(100, 100), 
-            this.ms_Water.material
-        );
-        aMeshMirror.add(this.ms_Water);
-        aMeshMirror.rotation.x = - Math.PI * 0.5;
-        aMeshMirror.position.y = -10;
+        // // Create the water effect
+        // this.ms_Water = new THREE.Water(renderer, camera, scene, {
+        //     textureWidth: 10,
+        //     textureHeight: 10,
+        //     waterNormals: waterNormals,
+        //     alpha:  1.0,
+        //     sunDirection: directionalLight.position.normalize(),
+        //     sunColor: 0xffffff,
+        //     waterColor: 0x001e0f,
+        //     betaVersion: 0,
+        //     side: THREE.DoubleSide
+        // });
+        // aMeshMirror = new THREE.Mesh(
+        //     new THREE.PlaneGeometry(100, 100), 
+        //     this.ms_Water.material
+        // );
+        // aMeshMirror.add(this.ms_Water);
+        // aMeshMirror.rotation.x = - Math.PI * 0.5;
+        // aMeshMirror.position.y = -10;
         
-        scene.add(aMeshMirror);
-        this.ms_Water.render();
+        // scene.add(aMeshMirror);
+        // this.ms_Water.render();
 
     var floorTexture = new THREE.ImageUtils.loadTexture( 'textures/stone.jpg' );
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping; 
@@ -299,7 +315,6 @@
     floor.position.y = -0.5;
     floor.rotation.x = Math.PI / 2;
     scene.add(floor);
-
 
                 for(var i=0; i<50; i++){
                     var x = Math.floor( Math.random() * 20 - 10 );
@@ -356,29 +371,31 @@
 
             var dt = 1/60;
             function animate() {
-                this.ms_Water.material.uniforms.time.value += 1.0 / 60.0;
+                // this.ms_Water.material.uniforms.time.value += 1.0 / 60.0;
                 id = requestAnimationFrame( animate );
                 if(controls.enabled){
                     world.step(dt);
 
                 }
-                aMeshMirror.position.y += 0.02;
+                //aMeshMirror.position.y += 0.02;
                 controls.update( Date.now() - time );
                 renderer.render( scene, camera );
                 time = Date.now();
+                if(shameMesh != null)
+                    shameMesh.position.copy(sphereBody.position);
                 
-                if(aMeshMirror.position.y > sphereBody.position.y){
-                    controls.enabled = false;
-                    var text2 = document.createElement('div');
-                    text2.style.position = 'absolute';
-                    text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-                    text2.style.width = 120;
-                    text2.style.height = 120;
-                    text2.innerHTML = "<img src=\"textures/end.png\">";
-                    text2.style.top = 200 + 'px';
-                    text2.style.left = 350 + 'px';
-                    document.body.appendChild(text2);
-                }
+                // if(aMeshMirror.position.y > sphereBody.position.y){
+                //     controls.enabled = false;
+                //     var text2 = document.createElement('div');
+                //     text2.style.position = 'absolute';
+                //     text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+                //     text2.style.width = 120;
+                //     text2.style.height = 120;
+                //     text2.innerHTML = "<img src=\"textures/end.png\">";
+                //     text2.style.top = 200 + 'px';
+                //     text2.style.left = 350 + 'px';
+                //     document.body.appendChild(text2);
+                // }
 
                 if(!levels.has(Math.floor(sphereBody.position.y/20))){
                                     for(var i=0; i<40; i++){

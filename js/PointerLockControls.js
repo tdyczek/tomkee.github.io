@@ -173,5 +173,6 @@
         velocity.z += inputVelocity.z;
 
         yawObject.position.copy(cannonBody.position);
+        yawObject.position.y += 2;
     };
 };
