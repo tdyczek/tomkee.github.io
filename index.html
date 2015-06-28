@@ -95,9 +95,9 @@
                    var loader = new THREE.ColladaLoader();
 
         var shameMesh;
-        loader.load("Truck_dae.dae", function (result) {
-            shameMesh = result.scene.children[0].children[0].clone();
-            shameMesh.scale.set(0.1, 0.1, 0.1);
+        loader.load("Orange.dae", function (result) {
+            shameMesh = result.scene.children[0].clone();
+            shameMesh.scale.set(0.5,0.5, 0.5);
             scene.add(shameMesh);
         });
             // loader = new THREE.JSONLoader();
