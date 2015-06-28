@@ -85,6 +85,7 @@
             var levels = new Map();
             var light;
             var id;
+            var isdead = false;
 
 
             var halfExtents = new CANNON.Vec3(1,1,1);
@@ -225,7 +226,7 @@
                 sphereShape = new CANNON.Sphere(radius);
                 sphereBody = new CANNON.Body({ mass: mass });
                 sphereBody.addShape(sphereShape);
-                sphereBody.position.set(-6,0,0);
+                sphereBody.position.set(2,0,17);
                 sphereBody.linearDamping = 0.9;
                 sphereBody.material = physicsMaterial;
                 world.addBody(sphereBody);
@@ -370,7 +371,8 @@
                     world.step(dt);
 
                 }
-                aMeshMirror.position.y += 0.02;
+                if(isdead == false)
+                    aMeshMirror.position.y += 0.02;
                 controls.update( Date.now() - time );
                 renderer.render( scene, camera );
                 time = Date.now();
@@ -379,6 +381,7 @@
                 
                 if(aMeshMirror.position.y > sphereBody.position.y){
                     controls.enabled = false;
+                    isdead = true;
                     var text2 = document.createElement('div');
                     text2.style.position = 'absolute';
                     text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
